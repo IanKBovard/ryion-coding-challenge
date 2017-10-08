@@ -5,11 +5,14 @@ const TOLERANCE = 0.02;
 
 let pipeX = { pipeSize: null, valveSize: null };
 let pipeY = { pipeSize: null, valveSize: null };
-let pipeZ = { rate: null, pipeSize: null };
+let pipeZ = { pipeSize: null };
+let testArray = [1, 2, 3];
 
-let minPipeX = { pipeSize: null, valveSize: null };
-let minPipeY = { pipeSize: null, valveSize: null };
-let minPipeZ = { pipeSize: null };
+let minPipeX = [{ rateX: null, pipeSizeX: null, valveSizeX: null }];
+let minPipeY = [{ rateY: null, pipeSizeY: null, valveSizeY: null }];
+let minPipeZ = [{ rateZ: null, pipeSizeZ: null }];
+
+let data = [minPipeX, minPipeY, minPipeZ];
 
 function calculatePipeSize(rate) {
   let pipeSize = 1.732 * 12.9 * 200 * rate / (208 * TOLERANCE);
@@ -22,12 +25,14 @@ function calculateValveSize(rate) {
 }
 
 function assignPipeAndValveSizeValuesForXYZ(rateX, rateY) {
-  pipeZ.rate = rateX + rateY;
+  minPipeX[0].rateX = rateX;
+  minPipeY[0].rateY = rateY;
+  minPipeZ[0].rateZ = rateX + rateY;
   pipeX.pipeSize = calculatePipeSize(rateX);
   pipeX.valveSize = calculateValveSize(rateX);
   pipeY.pipeSize = calculatePipeSize(rateY);
   pipeY.valveSize = calculateValveSize(rateY);
-  pipeZ.pipeSize = calculatePipeSize(pipeZ.rate);
+  pipeZ.pipeSize = calculatePipeSize(minPipeZ[0].rateZ);
   return;
 }
 
@@ -51,25 +56,29 @@ function loopThroughPipeOrValveArray(pipeOrValveSize, pipeOrValveArray) {
 function findMinimumPipeAndValveSizeForXYZ(rateX, rateY) {
   assignPipeAndValveSizeValuesForXYZ(rateX, rateY);
 
-  minPipeX.pipeSize = loopThroughPipeOrValveArray(pipeX.pipeSize, PIPE_SIZES);
-  minPipeX.valveSize = loopThroughPipeOrValveArray(pipeX.valveSize, VALVE_SIZES);
+  minPipeX[0].pipeSizeX = loopThroughPipeOrValveArray(pipeX.pipeSize, PIPE_SIZES);
+  minPipeX[0].valveSizeX = loopThroughPipeOrValveArray(pipeX.valveSize, VALVE_SIZES);
 
-  minPipeY.pipeSize = loopThroughPipeOrValveArray(pipeY.pipeSize, PIPE_SIZES);
-  minPipeY.valveSize = loopThroughPipeOrValveArray(pipeY.valveSize, VALVE_SIZES);
+  minPipeY[0].pipeSizeY = loopThroughPipeOrValveArray(pipeY.pipeSize, PIPE_SIZES);
+  minPipeY[0].valveSizeY = loopThroughPipeOrValveArray(pipeY.valveSize, VALVE_SIZES);
 
-  minPipeZ.pipeSize = loopThroughPipeOrValveArray(pipeZ.pipeSize, PIPE_SIZES);
+  minPipeZ[0].pipeSizeZ = loopThroughPipeOrValveArray(pipeZ.pipeSize, PIPE_SIZES);
 }
 
 findMinimumPipeAndValveSizeForXYZ(16.45, 18.9);
-console.log(pipeX);
+
 console.log(minPipeX);
+
+console.log(minPipeY);
+
+console.log(minPipeZ);
 
 //D3
 
 var boxCoord = [[400, 100], [400, 700], [900, 700], [900, 100], [400, 100]];
 
-var pipeXCoordBeforeArc = [[90, 300], [500, 300]];
-var pipeYCoordBeforeArc = [[90, 450], [500, 450]];
+var pipeXCoordBeforeArc = [[100, 300], [500, 300]];
+var pipeYCoordBeforeArc = [[100, 450], [500, 450]];
 
 var pipeXCoordAfterArc = [[696, 300], [775, 300]];
 var pipeYCoordAfterArc = [[696, 450], [775, 450]];
@@ -103,72 +112,157 @@ var box = svgContainer
   .attr('stroke-width', 8)
   .attr('fill', 'none');
 
-var pipeXLineBeforeArc = svgContainer
+var pipeXGroup = svgContainer
+  .append('g')
+  .attr('class', 'pipeX')
+  .data(minPipeX);
+
+pipeXGroup // pipe path
   .append('path')
   .attr('d', pipeXPathBeforeArc)
   .attr('stroke', 'black')
   .attr('stroke-width', 8)
   .attr('fill', 'none');
 
-var pipeXLineAfterArc = svgContainer
-  .append('path')
-  .attr('d', pipeXPathAfterArc)
-  .attr('stroke', 'black')
-  .attr('stroke-width', 8)
-  .attr('fill', 'none');
+pipeXGroup // rate x text
+  .append('text')
+  .attr('x', 10)
+  .attr('y', 310)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.rateX;
+  });
 
-var pipeYLineBeforeArc = svgContainer
-  .append('path')
-  .attr('d', pipeYPathBeforeArc)
-  .attr('stroke', 'black')
-  .attr('stroke-width', 8)
-  .attr('fill', 'none');
+pipeXGroup // pipe size text
+  .append('text')
+  .attr('x', 210)
+  .attr('y', 280)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.pipeSizeX;
+  });
 
-var pipeYLineAfterArc = svgContainer
-  .append('path')
-  .attr('d', pipeYPathAfterArc)
-  .attr('stroke', 'black')
-  .attr('stroke-width', 8)
-  .attr('fill', 'none');
+pipeXGroup // valve size text
+  .append('text')
+  .attr('x', 575)
+  .attr('y', 300)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.valveSizeX;
+  });
 
-var pipeZVerticalLine = svgContainer
-  .append('path')
-  .attr('d', pipeZVerticalPath)
-  .attr('stroke', 'black')
-  .attr('stroke-width', 8)
-  .attr('fill', 'none');
-
-var pipeZHorizontalLine = svgContainer
-  .append('path')
-  .attr('d', pipeZHorizontalPath)
-  .attr('stroke', 'black')
-  .attr('stroke-width', 8)
-  .attr('fill', 'none');
-
-var arcLineX = svgContainer
+pipeXGroup // valve X arc
   .append('path')
   .attr('d', 'M 496, 300 A 50, 50, 0, 0 ,1, 700, 300')
   .attr('fill', 'none')
   .attr('stroke', 'black')
   .attr('stroke-width', 8);
 
-var arcLineY = svgContainer
+pipeXGroup // path path after arc
   .append('path')
-  .attr('d', 'M496, 450 A 50, 50, 0, 0, 1, 700, 450')
-  .attr('fill', 'none')
+  .attr('d', pipeXPathAfterArc)
   .attr('stroke', 'black')
-  .attr('stroke-width', 8);
+  .attr('stroke-width', 8)
+  .attr('fill', 'none');
 
-var circleX = svgContainer
+pipeXGroup // upper circle
   .append('circle')
   .attr('cx', 775)
   .attr('cy', 300)
   .attr('r', 20)
   .attr('fill', 'black');
 
-var circleY = svgContainer
+var pipeYGroup = svgContainer
+  .data(minPipeY)
+  .append('g')
+  .attr('class', 'pipeY');
+
+pipeYGroup // pipe path
+  .append('path')
+  .attr('d', pipeYPathBeforeArc)
+  .attr('stroke', 'black')
+  .attr('stroke-width', 8)
+  .attr('fill', 'none');
+
+pipeYGroup // rate y text
+  .append('text')
+  .attr('x', 10)
+  .attr('y', 460)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.rateY;
+  });
+
+pipeYGroup // pipe size text
+  .append('text')
+  .attr('x', 210)
+  .attr('y', 430)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.pipeSizeY;
+  });
+
+pipeYGroup // valve size text
+  .append('text')
+  .attr('x', 575)
+  .attr('y', 460)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.valveSizeY;
+  });
+
+pipeYGroup // valve y arc
+  .append('path')
+  .attr('d', 'M496, 450 A 50, 50, 0, 0, 1, 700, 450')
+  .attr('fill', 'none')
+  .attr('stroke', 'black')
+  .attr('stroke-width', 8);
+
+pipeYGroup // pipe path after arc
+  .append('path')
+  .attr('d', pipeYPathAfterArc)
+  .attr('stroke', 'black')
+  .attr('stroke-width', 8)
+  .attr('fill', 'none');
+
+pipeYGroup // lower circle
   .append('circle')
   .attr('cx', 775)
   .attr('cy', 450)
   .attr('r', 20)
   .attr('fill', 'black');
+
+var pipeZGroup = svgContainer
+  .append('g')
+  .attr('class', 'pipeZ')
+  .data(minPipeZ);
+
+pipeZGroup // vertical pipe path
+  .append('path')
+  .attr('d', pipeZVerticalPath)
+  .attr('stroke', 'black')
+  .attr('stroke-width', 8)
+  .attr('fill', 'none');
+
+pipeZGroup // pipe Z path
+  .append('path')
+  .attr('d', pipeZHorizontalPath)
+  .attr('stroke', 'black')
+  .attr('stroke-width', 8)
+  .attr('fill', 'none');
+
+pipeZGroup
+  .append('text')
+  .attr('x', 1000)
+  .attr('y', 180)
+  .attr('font-family', 'arial')
+  .attr('font-size', 35)
+  .text(function(d) {
+    return d.pipeSizeZ;
+  });
