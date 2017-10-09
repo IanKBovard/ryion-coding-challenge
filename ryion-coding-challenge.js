@@ -12,7 +12,8 @@ let minPipeX = [{ rateX: null, pipeSizeX: null, valveSizeX: null }];
 let minPipeY = [{ rateY: null, pipeSizeY: null, valveSizeY: null }];
 let minPipeZ = [{ rateZ: null, pipeSizeZ: null }];
 
-let data = [minPipeX, minPipeY, minPipeZ];
+/*let data = [minPipeX, minPipeY, minPipeZ];
+*/
 
 function calculatePipeSize(rate) {
   let pipeSize = 1.732 * 12.9 * 200 * rate / (208 * TOLERANCE);
@@ -36,6 +37,14 @@ function assignPipeAndValveSizeValuesForXYZ(rateX, rateY) {
   return;
 }
 
+function checkValues() {
+  if (minPipeX[0].pipeSizeX === undefined || minPipeX[0].pipeSizeX === 'null') {
+    minPipeX[0].rateX = 'null';
+  }
+  if (minPipeY[0].pipeSizeY === undefined || minPipeY[0].pipeSizeY === 'null') {
+    minPipeY[0].rateY = 'null';
+  }
+}
 function loopThroughPipeOrValveArray(pipeOrValveSize, pipeOrValveArray) {
   let minPipeSize;
   if (pipeOrValveSize <= pipeOrValveArray[pipeOrValveArray.length - 1] || pipeOrValveSize >= pipeOrValveArray[0]) {
@@ -49,7 +58,8 @@ function loopThroughPipeOrValveArray(pipeOrValveSize, pipeOrValveArray) {
       }
     }
   } else {
-    return;
+    minPipeSize = 'null';
+    return minPipeSize;
   }
 }
 
@@ -63,22 +73,17 @@ function findMinimumPipeAndValveSizeForXYZ(rateX, rateY) {
   minPipeY[0].valveSizeY = loopThroughPipeOrValveArray(pipeY.valveSize, VALVE_SIZES);
 
   minPipeZ[0].pipeSizeZ = loopThroughPipeOrValveArray(pipeZ.pipeSize, PIPE_SIZES);
+
+  checkValues();
 }
-
+// Change Values in function to run
 findMinimumPipeAndValveSizeForXYZ(16.45, 18.9);
-
-console.log(minPipeX);
-
-console.log(minPipeY);
-
-console.log(minPipeZ);
-
 //D3
 
 var boxCoord = [[400, 100], [400, 700], [900, 700], [900, 100], [400, 100]];
 
-var pipeXCoordBeforeArc = [[100, 300], [500, 300]];
-var pipeYCoordBeforeArc = [[100, 450], [500, 450]];
+var pipeXCoordBeforeArc = [[110, 300], [500, 300]];
+var pipeYCoordBeforeArc = [[110, 450], [500, 450]];
 
 var pipeXCoordAfterArc = [[696, 300], [775, 300]];
 var pipeYCoordAfterArc = [[696, 450], [775, 450]];
@@ -126,7 +131,7 @@ pipeXGroup // pipe path
 
 pipeXGroup // rate x text
   .append('text')
-  .attr('x', 10)
+  .attr('x', 0)
   .attr('y', 310)
   .attr('font-family', 'arial')
   .attr('font-size', 35)
@@ -189,7 +194,7 @@ pipeYGroup // pipe path
 
 pipeYGroup // rate y text
   .append('text')
-  .attr('x', 10)
+  .attr('x', 0)
   .attr('y', 460)
   .attr('font-family', 'arial')
   .attr('font-size', 35)
